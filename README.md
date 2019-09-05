@@ -1,11 +1,15 @@
-# ts-frontend
+# シリトリウス - Shiritorius
 
 ## install
 
+Make sure you have [windows-build-tools](https://www.npmjs.com/package/windows-build-tools) globaly installed.
+
 ```sh
+# after installed windows-build-tools
 git clone <repository> <dir>
 cd <dir>
 yarn
+yarn preprocess
 ```
 
 ## develop
