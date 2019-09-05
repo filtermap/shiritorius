@@ -1,5 +1,9 @@
 # シリトリウス - Shiritorius
 
+## demo
+
+[シリトリウス - Shiritorius](https://filtermap.github.io/shiritorius/)
+
 ## install
 
 Make sure you have [windows-build-tools](https://www.npmjs.com/package/windows-build-tools) globaly installed.
