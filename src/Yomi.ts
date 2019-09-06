@@ -13,7 +13,7 @@ export const gyoToKatakanaMap = new Map<string, string>([
   ["マ", "マミムメモ"],
   ["ヤ", "ャヤュユョヨ"],
   ["ラ", "ラリルレロ"],
-  ["ワー", "ヮワヰヱヲンヴヷヸヹヺー"]
+  ["ワ", "ヮワヰヱヲンヴヷヸヹヺー"]
 ]);
 
 export type Yomi = {
