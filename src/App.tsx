@@ -19,8 +19,6 @@ const App = (props: Props): JSX.Element => {
     length: null,
     yomi: null
   });
-  const onClickReset = (): void =>
-    setState({ gyo: null, prefix: null, length: null, yomi: null });
   const createGyoSelector = (gyo: string) => (): void =>
     setState({ gyo, prefix: null, length: null, yomi: null });
   const createPrefixSelector = (prefix: string) => (): void =>
@@ -31,11 +29,7 @@ const App = (props: Props): JSX.Element => {
     setState({ ...state, yomi });
   return (
     <>
-      <div>
-        <button onClick={onClickReset}>
-          シリトリウス - Shiritorius で探す
-        </button>
-      </div>
+      <h1>シリトリウス - Shiritorius</h1>
       <GyoSelector gyo={state.gyo} createGyoSelector={createGyoSelector} />
       <PrefixSelector
         gyo={state.gyo}
@@ -55,6 +49,7 @@ const App = (props: Props): JSX.Element => {
         yomi={state.yomi}
         createYomiSelector={createYomiSelector}
       />
+      <YomiDisplay yomi={state.yomi} />
     </>
   );
 };
@@ -64,25 +59,19 @@ type GyoSelectorProps = {
   createGyoSelector: (gyo: string) => () => void;
 };
 
-const GyoSelector = (props: GyoSelectorProps): JSX.Element => {
-  if (props.gyo)
-    return (
-      <div>
-        <button onClick={props.createGyoSelector(props.gyo)}>
-          {props.gyo}行の
-        </button>
-      </div>
-    );
-  return (
-    <div>
-      {[...Yomi.gyoToKatakanaMap.keys()].map(gyo => (
-        <button key={gyo} onClick={props.createGyoSelector(gyo)}>
-          {gyo}行の
-        </button>
-      ))}
-    </div>
-  );
-};
+const GyoSelector = (props: GyoSelectorProps): JSX.Element => (
+  <div>
+    {[...Yomi.gyoToKatakanaMap.keys()].map(gyo => (
+      <button
+        key={gyo}
+        onClick={props.createGyoSelector(gyo)}
+        style={{ fontWeight: gyo === props.gyo ? "bold" : "normal" }}
+      >
+        {gyo}行の
+      </button>
+    ))}
+  </div>
+);
 
 type PrefixSelectorProps = {
   gyo: string | null;
@@ -92,20 +81,16 @@ type PrefixSelectorProps = {
 
 const PrefixSelector = (props: PrefixSelectorProps): JSX.Element => {
   if (!props.gyo) return <></>;
-  if (props.prefix)
-    return (
-      <div>
-        <button onClick={props.createPrefixSelector(props.prefix)}>
-          「{props.prefix}」から始まる
-        </button>
-      </div>
-    );
   const katakana = Yomi.gyoToKatakanaMap.get(props.gyo);
   if (!katakana) throw new Error("!katakana");
   return (
     <div>
       {[...katakana].map(prefix => (
-        <button key={prefix} onClick={props.createPrefixSelector(prefix)}>
+        <button
+          key={prefix}
+          onClick={props.createPrefixSelector(prefix)}
+          style={{ fontWeight: prefix === props.prefix ? "bold" : "normal" }}
+        >
           「{prefix}」から始まる
         </button>
       ))}
@@ -122,14 +107,6 @@ type LengthSelectorProps = {
 
 const LengthSelector = (props: LengthSelectorProps): JSX.Element => {
   if (!props.prefix) return <></>;
-  if (props.length)
-    return (
-      <div>
-        <button onClick={props.createLengthSelector(length)}>
-          {props.length}文字のことば
-        </button>
-      </div>
-    );
   const yomisByPrefix = Yomi.createPrefixToYomisMap(props.yomis).get(
     props.prefix
   );
@@ -140,7 +117,11 @@ const LengthSelector = (props: LengthSelectorProps): JSX.Element => {
   return (
     <div>
       {lengths.map(length => (
-        <button key={length} onClick={props.createLengthSelector(length)}>
+        <button
+          key={length}
+          onClick={props.createLengthSelector(length)}
+          style={{ fontWeight: length === props.length ? "bold" : "normal" }}
+        >
           {length}文字のことば
         </button>
       ))}
@@ -158,19 +139,7 @@ type YomiSelectorProps = {
 
 const YomiSelector = (props: YomiSelectorProps): JSX.Element => {
   if (!props.prefix || !props.length) return <></>;
-  if (props.yomi)
-    return (
-      <div>
-        <div>{props.yomi.katakana}</div>
-        <div>
-          {props.yomi.homonyms.map(hononym => (
-            <div
-              key={hononym.id}
-            >{`【${hononym.word}】［${hononym.partOfSpeech}］`}</div>
-          ))}
-        </div>
-      </div>
-    );
+
   const yomisByPrefix = Yomi.createPrefixToYomisMap(props.yomis).get(
     props.prefix
   );
@@ -187,10 +156,34 @@ const YomiSelector = (props: YomiSelectorProps): JSX.Element => {
   return (
     <div>
       {yomisByPrefixAndLength.map(yomi => (
-        <button key={yomi.id} onClick={props.createYomiSelector(yomi)}>
+        <button
+          key={yomi.id}
+          onClick={props.createYomiSelector(yomi)}
+          style={{ fontWeight: yomi === props.yomi ? "bold" : "normal" }}
+        >
           {yomi.katakana}
         </button>
       ))}
+    </div>
+  );
+};
+
+type YomiDisplayProps = {
+  yomi: Yomi.Yomi | null;
+};
+
+const YomiDisplay = (props: YomiDisplayProps): JSX.Element => {
+  if (!props.yomi) return <></>;
+  return (
+    <div>
+      <div>{props.yomi.katakana}</div>
+      <div>
+        {props.yomi.homonyms.map(hononym => (
+          <div
+            key={hononym.id}
+          >{`【${hononym.word}】［${hononym.partOfSpeech}］`}</div>
+        ))}
+      </div>
     </div>
   );
 };
