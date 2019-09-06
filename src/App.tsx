@@ -37,7 +37,9 @@ const App = (props: Props): JSX.Element => {
   return (
     <>
       <div>
-        <button onClick={onClickReset}>シリトリウス - Siritorius で探す</button>
+        <button onClick={onClickReset}>
+          シリトリウス - Shiritorius で探す
+        </button>
       </div>
       {state.gyo && (
         <div>
