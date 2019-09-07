@@ -1,4 +1,5 @@
 import React from "react";
+import styled from "styled-components";
 import * as Yomi from "./Yomi";
 
 type Props = {
@@ -11,6 +12,26 @@ type State = {
   length: number | null;
   yomi: Yomi.Yomi | null;
 };
+
+const headerHeight = "48px";
+const Header = styled.div`
+  background: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
+  font-size: 16px;
+  height: ${headerHeight};
+  line-height: ${headerHeight};
+  padding: 0 16px;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const Column = styled.div`
+  height: calc(100vh - ${headerHeight});
+  /* overflow-y: auto; */
+`;
 
 const App = (props: Props): JSX.Element => {
   const [state, setState] = React.useState<State>({
@@ -27,42 +48,29 @@ const App = (props: Props): JSX.Element => {
     setState({ ...state, length, yomi: null });
   const createYomiSelector = (yomi: Yomi.Yomi) => (): void =>
     setState({ ...state, yomi });
-  const headerHeight = "48px";
-  const columnHeight = `calc(100vh - ${headerHeight})`;
   return (
     <div>
-      <div
-        style={{
-          background: "rgb(0,0,0)",
-          color: "rgb(255,255,255)",
-          fontSize: "16px",
-          height: headerHeight,
-          lineHeight: headerHeight,
-          padding: "0 16px"
-        }}
-      >
-        シリトリウス - Shiritorius
-      </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <div style={{ height: columnHeight, overflowY: "auto" }}>
+      <Header>シリトリウス - Shiritorius</Header>
+      <Content>
+        <Column>
           <GyoSelector gyo={state.gyo} createGyoSelector={createGyoSelector} />
-        </div>
-        <div style={{ height: columnHeight, overflowY: "auto" }}>
+        </Column>
+        <Column>
           <PrefixSelector
             gyo={state.gyo}
             prefix={state.prefix}
             createPrefixSelector={createPrefixSelector}
           />
-        </div>
-        <div style={{ height: columnHeight, overflowY: "auto" }}>
+        </Column>
+        <Column>
           <LengthSelector
             yomis={props.yomis}
             prefix={state.prefix}
             length={state.length}
             createLengthSelector={createLengthSelector}
           />
-        </div>
-        <div style={{ height: columnHeight, overflowY: "auto" }}>
+        </Column>
+        <Column>
           <YomiSelector
             yomis={props.yomis}
             prefix={state.prefix}
@@ -70,20 +78,26 @@ const App = (props: Props): JSX.Element => {
             yomi={state.yomi}
             createYomiSelector={createYomiSelector}
           />
-        </div>
-        <div style={{ height: columnHeight, overflowY: "auto" }}>
+        </Column>
+        <Column>
           <YomiDisplay yomi={state.yomi} />
-        </div>
-      </div>
+        </Column>
+      </Content>
     </div>
   );
 };
 
-const selectorItemStyle = {
-  cursor: "pointer",
-  fontSize: "16px",
-  padding: "8px"
+type SelectorItemProps = {
+  bold: boolean;
 };
+
+const SelectorItem = styled.div`
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: ${(props: SelectorItemProps): string =>
+    props.bold ? "bold" : "normal"};
+  padding: 8px;
+`;
 
 type GyoSelectorProps = {
   gyo: string | null;
@@ -93,16 +107,13 @@ type GyoSelectorProps = {
 const GyoSelector = (props: GyoSelectorProps): JSX.Element => (
   <div>
     {[...Yomi.gyoToKatakanaMap.keys()].map(gyo => (
-      <div
+      <SelectorItem
         key={gyo}
         onClick={props.createGyoSelector(gyo)}
-        style={{
-          ...selectorItemStyle,
-          fontWeight: gyo === props.gyo ? "bold" : "normal"
-        }}
+        bold={gyo === props.gyo}
       >
         {gyo}行
-      </div>
+      </SelectorItem>
     ))}
   </div>
 );
@@ -120,16 +131,13 @@ const PrefixSelector = (props: PrefixSelectorProps): JSX.Element => {
   return (
     <div>
       {[...katakana].map(prefix => (
-        <div
+        <SelectorItem
           key={prefix}
           onClick={props.createPrefixSelector(prefix)}
-          style={{
-            ...selectorItemStyle,
-            fontWeight: prefix === props.prefix ? "bold" : "normal"
-          }}
+          bold={prefix === props.prefix}
         >
           {prefix}～
-        </div>
+        </SelectorItem>
       ))}
     </div>
   );
@@ -154,16 +162,13 @@ const LengthSelector = (props: LengthSelectorProps): JSX.Element => {
   return (
     <div>
       {lengths.map(length => (
-        <div
+        <SelectorItem
           key={length}
           onClick={props.createLengthSelector(length)}
-          style={{
-            ...selectorItemStyle,
-            fontWeight: length === props.length ? "bold" : "normal"
-          }}
+          bold={length === props.length}
         >
           {length}字
-        </div>
+        </SelectorItem>
       ))}
     </div>
   );
@@ -196,16 +201,13 @@ const YomiSelector = (props: YomiSelectorProps): JSX.Element => {
   return (
     <div>
       {yomisByPrefixAndLength.map(yomi => (
-        <div
+        <SelectorItem
           key={yomi.id}
           onClick={props.createYomiSelector(yomi)}
-          style={{
-            ...selectorItemStyle,
-            fontWeight: yomi === props.yomi ? "bold" : "normal"
-          }}
+          bold={yomi === props.yomi}
         >
           {yomi.katakana}
-        </div>
+        </SelectorItem>
       ))}
     </div>
   );
@@ -215,32 +217,30 @@ type YomiDisplayProps = {
   yomi: Yomi.Yomi | null;
 };
 
+const YomiKatakana = styled.div`
+  font-size: 16px;
+  font-weight: bold;
+  padding: 8px;
+`;
+
+const YomiHomonyms = styled.div`
+  font-size: 16px;
+  padding: 8px;
+`;
+
 const YomiDisplay = (props: YomiDisplayProps): JSX.Element => {
   if (!props.yomi) return <></>;
   return (
     <div>
-      <div
-        style={{
-          fontSize: "16px",
-          fontWeight: "bold",
-          padding: "8px"
-        }}
-      >
-        {props.yomi.katakana}
-      </div>
-      <div
-        style={{
-          fontSize: "16px",
-          padding: "8px"
-        }}
-      >
+      <YomiKatakana>{props.yomi.katakana}</YomiKatakana>
+      <YomiHomonyms>
         {props.yomi.homonyms.map(hononym => (
           <React.Fragment key={hononym.id}>
             {`【${hononym.word}】［${hononym.partOfSpeech}］`}
             <br />
           </React.Fragment>
         ))}
-      </div>
+      </YomiHomonyms>
     </div>
   );
 };
