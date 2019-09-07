@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import * as Yomi from "./Yomi";
 
 type Props = {
@@ -91,11 +91,10 @@ type SelectorItemProps = {
   bold: boolean;
 };
 
-const SelectorItem = styled.div`
+const SelectorItem = styled.div<SelectorItemProps>`
   cursor: pointer;
   font-size: 16px;
-  font-weight: ${(props: SelectorItemProps): string =>
-    props.bold ? "bold" : "normal"};
+  font-weight: ${(props): string => (props.bold ? "bold" : "normal")};
   padding: 8px;
 `;
 
