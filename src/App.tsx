@@ -188,6 +188,11 @@ const PrefixSelector = (props: PrefixSelectorProps): JSX.Element => {
   );
 };
 
+const NotFound = styled.div`
+  font-size: 16px;
+  padding: 8px;
+`;
+
 const NotMet = styled.span`
   text-decoration: line-through;
 `;
@@ -206,7 +211,7 @@ const LengthSelector = (props: LengthSelectorProps): JSX.Element => {
     props.prefix
   );
   if (!yomisByPrefix || yomisByPrefix.length === 0)
-    return <div>ことばが見つかりません</div>;
+    return <NotFound>ことばが見つかりません</NotFound>;
   const lengthToYomisMap = Yomi.createLengthToYomisMap(yomisByPrefix);
   const lengthAndYomisPairs = [...lengthToYomisMap.entries()].sort(
     ([lengthA], [lengthB]) => lengthA - lengthB
