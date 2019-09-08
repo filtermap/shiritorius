@@ -114,6 +114,9 @@ type SelectorItemProps = {
 };
 
 const SelectorItem = styled.div<SelectorItemProps>`
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
   cursor: pointer;
   font-size: 16px;
   font-weight: ${(props): string => (props.bold ? "bold" : "normal")};
