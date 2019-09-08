@@ -30,7 +30,7 @@ const Content = styled.div`
 
 const Column = styled.div`
   height: calc(100vh - ${headerHeight});
-  /* overflow-y: auto; */
+  overflow-y: auto;
 `;
 
 const App = (props: Props): JSX.Element => {
