@@ -28,6 +28,16 @@ export type Homonym = {
   partOfSpeech: string;
 };
 
+export function collectPartsOfSpeech(yomis: Yomi[]): string[] {
+  const partOfSpeechSet = new Set<string>();
+  for (const yomi of yomis) {
+    for (const { partOfSpeech } of yomi.homonyms) {
+      partOfSpeechSet.add(partOfSpeech);
+    }
+  }
+  return [...partOfSpeechSet.values()];
+}
+
 export type PrefixToYomisMap = Map<string, Yomi[]>;
 
 export function createPrefixToYomisMap(yomis: Yomi[]): PrefixToYomisMap {
