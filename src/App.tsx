@@ -250,7 +250,6 @@ type YomiSelectorProps = {
 
 const YomiSelector = (props: YomiSelectorProps): JSX.Element => {
   if (!props.prefix || !props.length) return <></>;
-
   const yomisByPrefix = Yomi.createPrefixToYomisMap(props.yomis).get(
     props.prefix
   );
