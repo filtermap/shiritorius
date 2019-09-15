@@ -2,6 +2,8 @@
 
 しりとり支援アプリです。 (A cheat app for the Japanese word chain game "Shiritori".)
 
+![Screen shot](screenshot.png?raw=true)
+
 ## demo
 
 [シリトリウス - Shiritorius](https://filtermap.github.io/shiritorius/)
