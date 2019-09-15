@@ -1,327 +1,560 @@
+/** @jsx jsx */
 import React from "react";
-import styled from "@emotion/styled";
+import { css, jsx } from "@emotion/core";
 import * as Yomi from "./Yomi";
 
-type Props = {
-  yomis: Yomi.Yomi[];
+const createKatakanaRegExpTester = (
+  regExp: RegExp
+): ((yomi: Yomi.Yomi) => boolean) => {
+  console.log(regExp);
+  return (yomi): boolean => regExp.test(yomi.katakana);
 };
 
-type State = {
-  partsOfSpeech: string[];
-  gyo: string | null;
-  prefix: string | null;
+const InputKatakana = (props: {
+  defaultValue: string[];
+  label: string;
+  onChange: (katakana: string[]) => void;
+}): JSX.Element => (
+  <div
+    css={css`
+      padding: 0.5rem 1rem;
+    `}
+  >
+    <input
+      type="text"
+      defaultValue={props.defaultValue}
+      onChange={(event): void =>
+        props.onChange(
+          Yomi.extractKatakana(Yomi.hiraganaToKatakana(event.target.value))
+        )
+      }
+    />{" "}
+    {props.label}
+  </div>
+);
+
+const lengthComparisonOperators = ["文字以内", "文字", "文字以上"] as const;
+type LengthComparisonOperator = typeof lengthComparisonOperators[number];
+// https://stackoverflow.com/questions/56565528/typescript-const-assertions-how-to-use-array-prototype-includes/56745484#56745484
+declare global {
+  interface ReadonlyArray<T> {
+    includes<U>(x: U & ((T & U) extends never ? never : unknown)): boolean;
+  }
+}
+const isLengthComparisonOperator = (
+  string: string
+): string is LengthComparisonOperator =>
+  lengthComparisonOperators.includes(string);
+
+const InputLength = (props: {
+  defaultLength: number | null;
+  defaultLengthComparisonOperator: LengthComparisonOperator;
+  onChangeLength: (length: number | null) => void;
+  onChangeLengthComparisonOperator: (
+    lengthComparisonOperator: LengthComparisonOperator
+  ) => void;
+}): JSX.Element => (
+  <div
+    css={css`
+      padding: 0.5rem 1rem;
+    `}
+  >
+    <input
+      type="number"
+      defaultValue={props.defaultLength ? props.defaultLength.toString() : ""}
+      min={1}
+      onChange={(event): void => {
+        const length = parseInt(event.target.value, 10);
+        if (!Number.isInteger(length) || length < 1)
+          return props.onChangeLength(null);
+        props.onChangeLength(length);
+      }}
+    />{" "}
+    <select
+      defaultValue={props.defaultLengthComparisonOperator}
+      onChange={(event): void => {
+        const lengthComparisonOperator = event.target.value;
+        if (!isLengthComparisonOperator(lengthComparisonOperator)) return;
+        props.onChangeLengthComparisonOperator(lengthComparisonOperator);
+      }}
+    >
+      {lengthComparisonOperators.map(operator => (
+        <option key={operator} value={operator}>
+          {operator}
+        </option>
+      ))}
+    </select>{" "}
+    の
+  </div>
+);
+
+const PartsOfSpeechSelector = (props: {
+  allPartsOfSpeech: string[];
+  selectedPartsOfSpeech: string[];
+  createPartsOfSpeechSelector: (partOfSpeech: string) => () => void;
+}): JSX.Element => {
+  const [opened, setOpened] = React.useState(false);
+  return (
+    <div>
+      <div
+        onClick={(): void => {
+          if (props.selectedPartsOfSpeech.length === 0) return;
+          setOpened(!opened);
+        }}
+        css={css`
+          &:hover {
+            background: rgba(0, 0, 0, 0.1);
+          }
+          cursor: pointer;
+          padding: 0.5rem 1rem;
+        `}
+      >
+        {props.selectedPartsOfSpeech.length >= 1
+          ? props.selectedPartsOfSpeech.join("、")
+          : "品詞を選択してください"}
+      </div>
+      {opened &&
+        props.allPartsOfSpeech.map(partOfSpeech => (
+          <div
+            key={partOfSpeech}
+            onClick={props.createPartsOfSpeechSelector(partOfSpeech)}
+            css={css`
+              &:hover {
+                background: rgba(0, 0, 0, 0.1);
+              }
+              cursor: pointer;
+              font-weight: ${props.selectedPartsOfSpeech.includes(partOfSpeech)
+                ? "bold"
+                : "normal"};
+              padding: 0.5rem 1rem 0.5rem 2rem;
+            `}
+          >
+            {partOfSpeech}
+          </div>
+        ))}
+    </div>
+  );
+};
+
+type Conditions = {
+  beginWith: string[];
+  notBeginWith: string[];
+  endWith: string[];
+  notEndWith: string[];
+  include: string[];
+  exclude: string[];
   length: number | null;
-  yomi: Yomi.Yomi | null;
+  lengthComparisonOperator: LengthComparisonOperator;
+  partsOfSpeech: string[];
+};
+
+const ConditionsDisplay = (props: Conditions): JSX.Element => (
+  <div
+    css={css`
+      padding: 0.5rem 1rem;
+    `}
+  >
+    {props.beginWith.length >= 1 && (
+      <div>{props.beginWith.join("、")}から始まる</div>
+    )}
+    {props.notBeginWith.length >= 1 && (
+      <div>{props.notBeginWith.join("、")}から始まらない</div>
+    )}
+    {props.endWith.length >= 1 && <div>{props.endWith.join("、")}で終わる</div>}
+    {props.notEndWith.length >= 1 && (
+      <div>{props.notEndWith.join("、")}で終わらない</div>
+    )}
+    {props.include.length >= 1 && <div>{props.include.join("、")}を含む</div>}
+    {props.exclude.length >= 1 && (
+      <div>{props.exclude.join("、")}を含まない</div>
+    )}
+    {props.length !== null && props.length >= 1 && (
+      <div>
+        {props.length}
+        {props.lengthComparisonOperator}の
+      </div>
+    )}
+    {props.partsOfSpeech.length === 0 ? (
+      <div>品詞が選択されていません</div>
+    ) : (
+      <div>{props.partsOfSpeech.join("、")}</div>
+    )}
+  </div>
+);
+type OnChangeKatakanaList = (katakanaList: string[]) => void;
+
+const ConditionsInput = (
+  props: Conditions & {
+    onChangeBeginWith: OnChangeKatakanaList;
+    onChangeNotBeginWith: OnChangeKatakanaList;
+    onChangeEndWidth: OnChangeKatakanaList;
+    onChangeNotEndWith: OnChangeKatakanaList;
+    onChangeInclude: OnChangeKatakanaList;
+    onChangeExclude: OnChangeKatakanaList;
+    onChangeLength: (length: number | null) => void;
+    onChangeLengthComparisonOperator: (
+      lengthComparisonOperator: LengthComparisonOperator
+    ) => void;
+    allPartsOfSpeech: string[];
+    createPartsOfSpeechSelector: (partOfSpeech: string) => () => void;
+  }
+): JSX.Element => (
+  <div>
+    <InputKatakana
+      defaultValue={props.beginWith}
+      label="から始まる"
+      onChange={props.onChangeBeginWith}
+    />
+    <InputKatakana
+      defaultValue={props.notBeginWith}
+      label="から始まらない"
+      onChange={props.onChangeNotBeginWith}
+    />
+    <InputKatakana
+      defaultValue={props.endWith}
+      label="で終わる"
+      onChange={props.onChangeEndWidth}
+    />
+    <InputKatakana
+      defaultValue={props.notEndWith}
+      label="で終わらない"
+      onChange={props.onChangeNotEndWith}
+    />
+    <InputKatakana
+      defaultValue={props.include}
+      label="を含む"
+      onChange={props.onChangeInclude}
+    />
+    <InputKatakana
+      defaultValue={props.exclude}
+      label="を含まない"
+      onChange={props.onChangeExclude}
+    />
+    <InputLength
+      defaultLength={props.length}
+      defaultLengthComparisonOperator={props.lengthComparisonOperator}
+      onChangeLength={props.onChangeLength}
+      onChangeLengthComparisonOperator={props.onChangeLengthComparisonOperator}
+    />
+    <PartsOfSpeechSelector
+      allPartsOfSpeech={props.allPartsOfSpeech}
+      selectedPartsOfSpeech={props.partsOfSpeech}
+      createPartsOfSpeechSelector={props.createPartsOfSpeechSelector}
+    />
+  </div>
+);
+
+const sortYomiListByKatakana = (yomiList: Yomi.Yomi[]): Yomi.Yomi[] =>
+  [...yomiList].sort((a, b) => (a.katakana < b.katakana ? -1 : 1));
+
+const YomiList = (props: {
+  allYomiList: Yomi.Yomi[];
+  selectedYomiList: Yomi.Yomi[];
+}): JSX.Element => {
+  const [state, setState] = React.useState<{
+    selectedAndSortedYomiList: Yomi.Yomi[];
+    pageSize: number;
+    pageNumber: number;
+    yomi: Yomi.Yomi | null;
+  }>({
+    selectedAndSortedYomiList: sortYomiListByKatakana(props.selectedYomiList),
+    pageSize: 100,
+    pageNumber: 0,
+    yomi: null
+  });
+  React.useEffect(() => {
+    setState({
+      ...state,
+      selectedAndSortedYomiList: sortYomiListByKatakana(props.selectedYomiList),
+      pageNumber: 0,
+      yomi: null
+    });
+  }, [props.selectedYomiList]);
+  const beginIndex = state.pageNumber * state.pageSize;
+  const endIndex = beginIndex + state.pageSize;
+  const pageYomiList = state.selectedAndSortedYomiList.slice(
+    beginIndex,
+    endIndex
+  );
+  const numberOfPages = Math.floor(
+    props.selectedYomiList.length / state.pageSize
+  );
+  return (
+    <div>
+      <div
+        css={css`
+          padding: 0.5rem 1rem;
+        `}
+      >
+        {state.selectedAndSortedYomiList.length} 件
+        {state.pageNumber >= 1 && `中 ${state.pageNumber + 1} ページ目`}
+      </div>
+      {numberOfPages >= 1 && (
+        <div
+          css={css`
+            display: flex;
+            & > div {
+              flex: 1;
+              padding: 0.5rem 1rem;
+            }
+          `}
+        >
+          {state.pageNumber > 0 ? (
+            <div
+              onClick={(): void =>
+                setState({ ...state, pageNumber: state.pageNumber - 1 })
+              }
+              css={css`
+                &:hover {
+                  background: rgba(0, 0, 0, 0.1);
+                }
+                cursor: pointer;
+              `}
+            >
+              前のページ
+            </div>
+          ) : (
+            <div></div>
+          )}
+          {state.pageNumber < numberOfPages ? (
+            <div
+              onClick={(): void =>
+                setState({ ...state, pageNumber: state.pageNumber + 1 })
+              }
+              css={css`
+                &:hover {
+                  background: rgba(0, 0, 0, 0.1);
+                }
+                cursor: pointer;
+              `}
+            >
+              次のページ
+            </div>
+          ) : (
+            <div></div>
+          )}
+        </div>
+      )}
+      <ol
+        css={css`
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          & > li > div {
+            &:hover {
+              background: rgba(0, 0, 0, 0.1);
+            }
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+          }
+        `}
+      >
+        {pageYomiList.map(yomi => (
+          <li key={yomi.id}>
+            <div
+              onClick={(): void =>
+                setState({ ...state, yomi: yomi === state.yomi ? null : yomi })
+              }
+            >
+              {yomi.katakana}
+            </div>
+            {yomi === state.yomi && (
+              <ul
+                css={css`
+                  list-style: none;
+                  padding: 0.5rem 1rem 1rem;
+                `}
+              >
+                {yomi.homonyms.map(hononym => (
+                  <li key={hononym.id}>
+                    【{hononym.word}】［{hononym.partOfSpeech}］
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 };
 
 const headerHeight = "48px";
-const Header = styled.div`
-  background: rgb(0, 0, 0);
-  color: rgb(255, 255, 255);
-  font-size: 16px;
-  height: ${headerHeight};
-  line-height: ${headerHeight};
-  padding: 0 16px;
-`;
+const wideWidth = "640px";
 
-const Content = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-const Column = styled.div`
-  height: calc(100vh - ${headerHeight});
-  overflow-y: auto;
-`;
-
-const App = (props: Props): JSX.Element => {
-  const partsOfSpeech = Yomi.collectPartsOfSpeech(props.yomis);
-  const [state, setState] = React.useState<State>({
-    partsOfSpeech,
-    gyo: null,
-    prefix: null,
+const App = (props: { yomis: Yomi.Yomi[] }): JSX.Element => {
+  const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.yomis);
+  const [state, setState] = React.useState<Conditions>({
+    beginWith: [],
+    notBeginWith: [],
+    endWith: [],
+    notEndWith: ["ン"],
+    include: [],
+    exclude: [],
     length: null,
-    yomi: null
+    lengthComparisonOperator: "文字",
+    partsOfSpeech: allPartsOfSpeech.includes("名詞")
+      ? ["名詞"]
+      : allPartsOfSpeech
   });
+  const beginsWith =
+    state.beginWith.length === 0
+      ? (): boolean => true
+      : createKatakanaRegExpTester(
+          new RegExp(`^(${state.beginWith.join("|")})`)
+        );
+  const doesNotBeginWith =
+    state.notBeginWith.length === 0
+      ? (): boolean => true
+      : createKatakanaRegExpTester(
+          new RegExp(`^(?!(${state.notBeginWith.join("|")}))`)
+        );
+  const endsWith =
+    state.endWith.length === 0
+      ? (): boolean => true
+      : createKatakanaRegExpTester(new RegExp(`(${state.endWith.join("|")})$`));
+  const doesNotEndWith =
+    state.notEndWith.length === 0
+      ? (): boolean => true
+      : createKatakanaRegExpTester(
+          new RegExp(`(?<!(${state.notEndWith.join("|")}))$`)
+        );
+  const includes =
+    state.include.length === 0
+      ? (): boolean => true
+      : createKatakanaRegExpTester(new RegExp(`(${state.include.join("|")})`));
+  const excludes =
+    state.exclude.length === 0
+      ? (): boolean => true
+      : createKatakanaRegExpTester(
+          new RegExp(`^(?!.*(${state.exclude.join("|")})).*$`)
+        );
+  const hasLength = ((): ((yomi: Yomi.Yomi) => boolean) => {
+    if (state.length === null) return (): boolean => true;
+    if (state.length < 1) return (): boolean => true;
+    const length = state.length;
+    switch (state.lengthComparisonOperator) {
+      case "文字以内":
+        return (yomi): boolean => yomi.katakana.length <= length;
+      case "文字":
+        return (yomi): boolean => yomi.katakana.length === length;
+      case "文字以上":
+        return (yomi): boolean => yomi.katakana.length >= length;
+    }
+  })();
+  const includesPartsOfSpeech = (yomi: Yomi.Yomi): boolean =>
+    yomi.homonyms.some(homonym =>
+      state.partsOfSpeech.includes(homonym.partOfSpeech)
+    );
   const createPartsOfSpeechSelector = (partOfSpeech: string) => (): void =>
     setState({
       ...state,
       partsOfSpeech: state.partsOfSpeech.includes(partOfSpeech)
-        ? state.partsOfSpeech.filter(part => part !== partOfSpeech)
+        ? state.partsOfSpeech.filter((part: string) => part !== partOfSpeech)
         : [...state.partsOfSpeech, partOfSpeech]
     });
-  const createGyoSelector = (gyo: string) => (): void =>
-    setState({ ...state, gyo, prefix: null, length: null, yomi: null });
-  const createPrefixSelector = (prefix: string) => (): void =>
-    setState({ ...state, prefix, length: null, yomi: null });
-  const createLengthSelector = (length: number) => (): void =>
-    setState({ ...state, length, yomi: null });
-  const createYomiSelector = (yomi: Yomi.Yomi) => (): void =>
-    setState({ ...state, yomi });
-  return (
-    <div>
-      <Header>シリトリウス - Shiritorius</Header>
-      <Content>
-        <Column>
-          <PartsOfSpeechSelector
-            partsOfSpeech={partsOfSpeech}
-            selectedPartsOfSpeech={state.partsOfSpeech}
-            createPartsOfSpeechSelector={createPartsOfSpeechSelector}
-          />
-        </Column>
-        <Column>
-          <GyoSelector gyo={state.gyo} createGyoSelector={createGyoSelector} />
-        </Column>
-        <Column>
-          <PrefixSelector
-            gyo={state.gyo}
-            prefix={state.prefix}
-            createPrefixSelector={createPrefixSelector}
-          />
-        </Column>
-        <Column>
-          <LengthSelector
-            selectedPartsOfSpeech={state.partsOfSpeech}
-            yomis={props.yomis}
-            prefix={state.prefix}
-            length={state.length}
-            createLengthSelector={createLengthSelector}
-          />
-        </Column>
-        <Column>
-          <YomiSelector
-            yomis={props.yomis}
-            selectedPartsOfSpeech={state.partsOfSpeech}
-            prefix={state.prefix}
-            length={state.length}
-            yomi={state.yomi}
-            createYomiSelector={createYomiSelector}
-          />
-        </Column>
-        <Column>
-          <YomiDisplay
-            selectedPartsOfSpeech={state.partsOfSpeech}
-            yomi={state.yomi}
-          />
-        </Column>
-      </Content>
-    </div>
-  );
-};
-
-type SelectorItemProps = {
-  bold: boolean;
-};
-
-const SelectorItem = styled.div<SelectorItemProps>`
-  &:hover {
-    background: rgba(0, 0, 0, 0.1);
+  const yomis = [];
+  for (const yomi of props.yomis) {
+    if (!includesPartsOfSpeech(yomi)) continue;
+    if (!beginsWith(yomi)) continue;
+    if (!doesNotBeginWith(yomi)) continue;
+    if (!endsWith(yomi)) continue;
+    if (!doesNotEndWith(yomi)) continue;
+    if (!includes(yomi)) continue;
+    if (!excludes(yomi)) continue;
+    if (!hasLength(yomi)) continue;
+    yomis.push(yomi);
   }
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: ${(props): string => (props.bold ? "bold" : "normal")};
-  padding: 8px;
-`;
 
-type PartsOfSpeechSelectorProps = {
-  partsOfSpeech: string[];
-  selectedPartsOfSpeech: string[];
-  createPartsOfSpeechSelector: (partOfSpeech: string) => () => void;
-};
-
-const PartsOfSpeechSelector = (
-  props: PartsOfSpeechSelectorProps
-): JSX.Element => (
-  <div>
-    {props.partsOfSpeech.map(partOfSpeech => {
-      return (
-        <SelectorItem
-          key={partOfSpeech}
-          bold={props.selectedPartsOfSpeech.includes(partOfSpeech)}
-          onClick={props.createPartsOfSpeechSelector(partOfSpeech)}
-        >
-          {partOfSpeech}
-        </SelectorItem>
-      );
-    })}
-  </div>
-);
-
-type GyoSelectorProps = {
-  gyo: string | null;
-  createGyoSelector: (gyo: string) => () => void;
-};
-
-const GyoSelector = (props: GyoSelectorProps): JSX.Element => (
-  <div>
-    {[...Yomi.gyoToKatakanaMap.keys()].map(gyo => (
-      <SelectorItem
-        key={gyo}
-        onClick={props.createGyoSelector(gyo)}
-        bold={gyo === props.gyo}
+  return (
+    <div>
+      <div
+        css={css`
+          background: rgb(0, 0, 0);
+          color: rgb(255, 255, 255);
+          height: ${headerHeight};
+          line-height: ${headerHeight};
+          padding: 0 1rem;
+        `}
       >
-        {gyo}行
-      </SelectorItem>
-    ))}
-  </div>
-);
-
-type PrefixSelectorProps = {
-  gyo: string | null;
-  prefix: string | null;
-  createPrefixSelector: (prefix: string) => () => void;
-};
-
-const PrefixSelector = (props: PrefixSelectorProps): JSX.Element => {
-  if (!props.gyo) return <></>;
-  const katakana = Yomi.gyoToKatakanaMap.get(props.gyo);
-  if (!katakana) throw new Error("!katakana");
-  return (
-    <div>
-      {[...katakana].map(prefix => (
-        <SelectorItem
-          key={prefix}
-          onClick={props.createPrefixSelector(prefix)}
-          bold={prefix === props.prefix}
+        シリトリウス - Shiritorius
+      </div>
+      <div
+        css={css`
+          @media all and (min-width: ${wideWidth}) {
+            display: flex;
+          }
+        `}
+      >
+        <div
+          css={css`
+            @media all and (min-width: ${wideWidth}) {
+              flex: 1;
+              height: calc(100vh - ${headerHeight});
+              order: 1;
+              overflow-y: auto;
+            }
+          `}
         >
-          {prefix}～
-        </SelectorItem>
-      ))}
-    </div>
-  );
-};
-
-const NotFound = styled.div`
-  font-size: 16px;
-  padding: 8px;
-`;
-
-const NotMet = styled.span`
-  text-decoration: line-through;
-`;
-
-type LengthSelectorProps = {
-  selectedPartsOfSpeech: string[];
-  yomis: Yomi.Yomi[];
-  prefix: string | null;
-  length: number | null;
-  createLengthSelector: (length: number) => () => void;
-};
-
-const LengthSelector = (props: LengthSelectorProps): JSX.Element => {
-  if (!props.prefix) return <></>;
-  const yomisByPrefix = Yomi.createPrefixToYomisMap(props.yomis).get(
-    props.prefix
-  );
-  if (!yomisByPrefix || yomisByPrefix.length === 0)
-    return <NotFound>ことばが見つかりません</NotFound>;
-  const lengthToYomisMap = Yomi.createLengthToYomisMap(yomisByPrefix);
-  const lengthAndYomisPairs = [...lengthToYomisMap.entries()].sort(
-    ([lengthA], [lengthB]) => lengthA - lengthB
-  );
-  return (
-    <div>
-      {lengthAndYomisPairs.map(([length, yomis]) => (
-        <SelectorItem
-          key={length}
-          onClick={props.createLengthSelector(length)}
-          bold={length === props.length}
+          <div
+            css={css`
+              border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+              padding: 0.5rem 0;
+            `}
+          >
+            <ConditionsInput
+              {...state}
+              onChangeBeginWith={(beginWith): void =>
+                setState({ ...state, beginWith })
+              }
+              onChangeNotBeginWith={(notBeginWith): void =>
+                setState({ ...state, notBeginWith })
+              }
+              onChangeEndWidth={(endWith): void =>
+                setState({ ...state, endWith })
+              }
+              onChangeNotEndWith={(notEndWith): void =>
+                setState({ ...state, notEndWith })
+              }
+              onChangeInclude={(include): void =>
+                setState({ ...state, include })
+              }
+              onChangeExclude={(exclude): void =>
+                setState({ ...state, exclude })
+              }
+              onChangeLength={(length): void => setState({ ...state, length })}
+              onChangeLengthComparisonOperator={(
+                lengthComparisonOperator
+              ): void => setState({ ...state, lengthComparisonOperator })}
+              allPartsOfSpeech={allPartsOfSpeech}
+              createPartsOfSpeechSelector={createPartsOfSpeechSelector}
+            />
+          </div>
+          <div
+            css={css`
+              @media all and (min-width: ${wideWidth}) {
+                border-bottom: 0;
+              }
+              border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+              padding: 0.5rem 0;
+            `}
+          >
+            <ConditionsDisplay {...state} />
+          </div>
+        </div>
+        <div
+          css={css`
+            @media all and (min-width: ${wideWidth}) {
+              border-right: 1px solid rgba(0, 0, 0, 0.5);
+              flex: 1;
+              height: calc(100vh - ${headerHeight});
+              overflow-y: auto;
+            }
+          `}
         >
-          {yomis.some(yomi =>
-            yomi.homonyms.some(homonym =>
-              props.selectedPartsOfSpeech.includes(homonym.partOfSpeech)
-            )
-          ) ? (
-            `${length}字`
-          ) : (
-            <NotMet>{length}字</NotMet>
-          )}
-        </SelectorItem>
-      ))}
-    </div>
-  );
-};
-
-type YomiSelectorProps = {
-  yomis: Yomi.Yomi[];
-  selectedPartsOfSpeech: string[];
-  prefix: string | null;
-  length: number | null;
-  yomi: Yomi.Yomi | null;
-  createYomiSelector: (yomi: Yomi.Yomi) => () => void;
-};
-
-const YomiSelector = (props: YomiSelectorProps): JSX.Element => {
-  if (!props.prefix || !props.length) return <></>;
-  const yomisByPrefix = Yomi.createPrefixToYomisMap(props.yomis).get(
-    props.prefix
-  );
-  if (!yomisByPrefix || yomisByPrefix.length === 0)
-    return <div>ことばが見つかりません</div>;
-  const yomisByPrefixAndLength = Yomi.createLengthToYomisMap(yomisByPrefix).get(
-    props.length
-  );
-  if (!yomisByPrefixAndLength || yomisByPrefixAndLength.length === 0)
-    throw new Error(
-      "!yomisByPrefixAndLength || yomisByPrefixAndLength.length === 0"
-    );
-  yomisByPrefixAndLength.sort((a, b) => (a.katakana < b.katakana ? -1 : 1));
-  return (
-    <div>
-      {yomisByPrefixAndLength.map(yomi => (
-        <SelectorItem
-          key={yomi.id}
-          onClick={props.createYomiSelector(yomi)}
-          bold={yomi === props.yomi}
-        >
-          {yomi.homonyms.some(homonym =>
-            props.selectedPartsOfSpeech.includes(homonym.partOfSpeech)
-          ) ? (
-            yomi.katakana
-          ) : (
-            <NotMet>{yomi.katakana}</NotMet>
-          )}
-        </SelectorItem>
-      ))}
-    </div>
-  );
-};
-
-type YomiDisplayProps = {
-  selectedPartsOfSpeech: string[];
-  yomi: Yomi.Yomi | null;
-};
-
-const YomiKatakana = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-  padding: 8px;
-`;
-
-const YomiHomonyms = styled.div`
-  font-size: 16px;
-  padding: 8px;
-`;
-
-const YomiDisplay = (props: YomiDisplayProps): JSX.Element => {
-  if (!props.yomi) return <></>;
-  return (
-    <div>
-      <YomiKatakana>{props.yomi.katakana}</YomiKatakana>
-      <YomiHomonyms>
-        {props.yomi.homonyms.map(homonym => (
-          <React.Fragment key={homonym.id}>
-            {props.selectedPartsOfSpeech.includes(homonym.partOfSpeech) ? (
-              `【${homonym.word}】［${homonym.partOfSpeech}］`
-            ) : (
-              <NotMet>
-                【{homonym.word}】［{homonym.partOfSpeech}］
-              </NotMet>
-            )}
-            <br />
-          </React.Fragment>
-        ))}
-      </YomiHomonyms>
+          <YomiList allYomiList={props.yomis} selectedYomiList={yomis} />
+        </div>
+      </div>
     </div>
   );
 };

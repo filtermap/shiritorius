@@ -3,6 +3,14 @@ export const katakana =
 
 export const katakanaOnlyRegexp = /^[ァ-ヺー]+$/;
 
+export const hiraganaToKatakana = (string: string): string =>
+  string.replace(/[ぁ-ゖ]/g, match =>
+    String.fromCharCode(match.charCodeAt(0) + 96)
+  );
+
+export const extractKatakana = (string: string): string[] =>
+  string.split(/[^ァ-ヺー]/).filter(string => string.length > 0);
+
 export const gyoToKatakanaMap = new Map<string, string>([
   ["ア", "ァアィイゥウェエォオ"],
   ["カ", "カガキギクグケゲコゴヵヶ"],
