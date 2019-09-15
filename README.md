@@ -1,5 +1,7 @@
 # シリトリウス - Shiritorius
 
+しりとり支援アプリです。 (A cheat app for the Japanese word chain game "Shiritori".)
+
 ## demo
 
 [シリトリウス - Shiritorius](https://filtermap.github.io/shiritorius/)
