@@ -2,6 +2,7 @@
 import React from "react";
 import { css, jsx } from "@emotion/core";
 import * as Yomi from "./Yomi";
+import copyingUrl from "./COPYING.txt";
 
 const createKatakanaRegExpTester = (
   regExp: RegExp
@@ -465,19 +466,37 @@ const App = (props: { yomis: Yomi.Yomi[] }): JSX.Element => {
     if (!hasLength(yomi)) continue;
     yomis.push(yomi);
   }
-
   return (
     <div>
       <div
         css={css`
           background: rgb(0, 0, 0);
           color: rgb(255, 255, 255);
+          display: flex;
           height: ${headerHeight};
           line-height: ${headerHeight};
-          padding: 0 1rem;
+          padding: 0 0.5rem;
+          position: sticky;
+          top: 0;
+          & > div {
+            padding: 0 0.5rem;
+          }
+          & a {
+            color: rgb(255, 255, 255);
+          }
         `}
       >
-        シリトリウス - Shiritorius
+        <div>シリトリウス - Shiritorius</div>
+        <div
+          css={css`
+            margin-left: auto;
+          `}
+        >
+          <a href={copyingUrl}>辞書</a>
+        </div>
+        <div>
+          <a href="https://github.com/filtermap/shiritorius">GitHub</a>
+        </div>
       </div>
       <div
         css={css`
