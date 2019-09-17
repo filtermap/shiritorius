@@ -6,10 +6,8 @@ import copyingUrl from "./COPYING.txt";
 
 const createKatakanaRegExpTester = (
   regExp: RegExp
-): ((yomi: Yomi.Yomi) => boolean) => {
-  console.log(regExp);
-  return (yomi): boolean => regExp.test(yomi.katakana);
-};
+): ((yomi: Yomi.Yomi) => boolean) => (yomi): boolean =>
+  regExp.test(yomi.katakana);
 
 const InputKatakana = (props: {
   defaultValue: string[];
