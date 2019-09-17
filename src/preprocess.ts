@@ -140,13 +140,13 @@ function parseDictionaryCSV(filepath: string): Promise<Record[]> {
 function recordsToYomis(records: Record[]): Yomi.Yomi[] {
   console.log(`number of records being processed: ${records.length}`);
   const katakanaToYomiMap = new Map<string, Yomi.Yomi>();
-  let numberOfRecordsNotIncludingKatakanaYomi = 0;
+  let numberOfRecordsWithYomiIncludingOtherThanKatakana = 0;
   let nextYomiId = 0;
   let nextHomonymId = 0;
   for (const record of records) {
     const katakana = record[11];
     if (!katakana.match(Yomi.katakanaOnlyRegexp)) {
-      numberOfRecordsNotIncludingKatakanaYomi++;
+      numberOfRecordsWithYomiIncludingOtherThanKatakana++;
       continue;
     }
     const word = record[0];
@@ -170,7 +170,7 @@ function recordsToYomis(records: Record[]): Yomi.Yomi[] {
     nextHomonymId++;
   }
   console.log(
-    `number of records not including katakana-yomi: ${numberOfRecordsNotIncludingKatakanaYomi}`
+    `number of records with yomi including other than katakana: ${numberOfRecordsWithYomiIncludingOtherThanKatakana}`
   );
   const yomis = [...katakanaToYomiMap.values()];
   console.log(`number of yomis: ${yomis.length}`);
