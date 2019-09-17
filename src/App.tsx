@@ -243,20 +243,15 @@ const ConditionsInput = (
   </div>
 );
 
-const sortYomiListByKatakana = (yomiList: Yomi.Yomi[]): Yomi.Yomi[] =>
-  [...yomiList].sort((a, b) => (a.katakana < b.katakana ? -1 : 1));
-
 const YomiList = (props: {
   allYomiList: Yomi.Yomi[];
   selectedYomiList: Yomi.Yomi[];
 }): JSX.Element => {
   const [state, setState] = React.useState<{
-    selectedAndSortedYomiList: Yomi.Yomi[];
     pageSize: number;
     pageNumber: number;
     yomi: Yomi.Yomi | null;
   }>({
-    selectedAndSortedYomiList: sortYomiListByKatakana(props.selectedYomiList),
     pageSize: 100,
     pageNumber: 0,
     yomi: null
@@ -264,17 +259,13 @@ const YomiList = (props: {
   React.useEffect(() => {
     setState({
       ...state,
-      selectedAndSortedYomiList: sortYomiListByKatakana(props.selectedYomiList),
       pageNumber: 0,
       yomi: null
     });
   }, [props.selectedYomiList]);
   const beginIndex = state.pageNumber * state.pageSize;
   const endIndex = beginIndex + state.pageSize;
-  const pageYomiList = state.selectedAndSortedYomiList.slice(
-    beginIndex,
-    endIndex
-  );
+  const pageYomiList = props.selectedYomiList.slice(beginIndex, endIndex);
   const numberOfPages = Math.floor(
     props.selectedYomiList.length / state.pageSize
   );
@@ -285,7 +276,7 @@ const YomiList = (props: {
           padding: 0.5rem 1rem;
         `}
       >
-        {state.selectedAndSortedYomiList.length} 件
+        {props.selectedYomiList.length} 件
         {state.pageNumber >= 1 && `中 ${state.pageNumber + 1} ページ目`}
       </div>
       {numberOfPages >= 1 && (
@@ -381,9 +372,15 @@ const YomiList = (props: {
 const headerHeight = "48px";
 const wideWidth = "640px";
 
-const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
-  const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.yomiList);
-  const [state, setState] = React.useState<Conditions>({
+const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
+  const [state, setState] = React.useState<
+    {
+      sortedAllYomiList: Yomi.Yomi[];
+      allPartsOfSpeech: string[];
+    } & Conditions
+  >({
+    sortedAllYomiList: [],
+    allPartsOfSpeech: [],
     beginWith: [],
     notBeginWith: [],
     endWith: [],
@@ -392,10 +389,19 @@ const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
     exclude: [],
     length: null,
     lengthComparisonOperator: "文字",
-    partsOfSpeech: allPartsOfSpeech.includes("名詞")
-      ? ["名詞"]
-      : allPartsOfSpeech
+    partsOfSpeech: []
   });
+  React.useEffect(() => {
+    const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.allYomiList);
+    setState({
+      ...state,
+      sortedAllYomiList: Yomi.sortByKatakana(props.allYomiList),
+      allPartsOfSpeech,
+      partsOfSpeech: allPartsOfSpeech.includes("名詞")
+        ? ["名詞"]
+        : allPartsOfSpeech
+    });
+  }, [props.allYomiList]);
   const beginsWith =
     state.beginWith.length === 0
       ? (): boolean => true
@@ -452,8 +458,8 @@ const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
         ? state.partsOfSpeech.filter((part: string) => part !== partOfSpeech)
         : [...state.partsOfSpeech, partOfSpeech]
     });
-  const yomiList = [];
-  for (const yomi of props.yomiList) {
+  const sortedSelectedYomiList = [];
+  for (const yomi of state.sortedAllYomiList) {
     if (!includesPartsOfSpeech(yomi)) continue;
     if (!beginsWith(yomi)) continue;
     if (!doesNotBeginWith(yomi)) continue;
@@ -462,7 +468,7 @@ const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
     if (!includes(yomi)) continue;
     if (!excludes(yomi)) continue;
     if (!hasLength(yomi)) continue;
-    yomiList.push(yomi);
+    sortedSelectedYomiList.push(yomi);
   }
   return (
     <div>
@@ -543,7 +549,7 @@ const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
               onChangeLengthComparisonOperator={(
                 lengthComparisonOperator
               ): void => setState({ ...state, lengthComparisonOperator })}
-              allPartsOfSpeech={allPartsOfSpeech}
+              allPartsOfSpeech={state.allPartsOfSpeech}
               createPartsOfSpeechSelector={createPartsOfSpeechSelector}
             />
           </div>
@@ -569,7 +575,10 @@ const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
             }
           `}
         >
-          <YomiList allYomiList={props.yomiList} selectedYomiList={yomiList} />
+          <YomiList
+            allYomiList={state.sortedAllYomiList}
+            selectedYomiList={sortedSelectedYomiList}
+          />
         </div>
       </div>
     </div>

@@ -8,7 +8,10 @@ async function main(): Promise<void> {
   const yomiList = await fetch(yomiListJSONUrl).then(response =>
     response.json()
   );
-  ReactDOM.render(<App yomiList={yomiList} />, document.getElementById("app"));
+  ReactDOM.render(
+    <App allYomiList={yomiList} />,
+    document.getElementById("app")
+  );
 }
 
 main();

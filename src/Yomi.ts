@@ -20,6 +20,9 @@ export type Homonym = {
   partOfSpeech: string;
 };
 
+export const sortByKatakana = (yomiList: Yomi[]): Yomi[] =>
+  [...yomiList].sort((a, b) => (a.katakana < b.katakana ? -1 : 1));
+
 export function collectPartsOfSpeech(yomiList: Yomi[]): string[] {
   const partOfSpeechSet = new Set<string>();
   for (const yomi of yomiList) {
