@@ -9,10 +9,10 @@ const createKatakanaRegExpTester = (
 ): ((yomi: Yomi.Yomi) => boolean) => (yomi): boolean =>
   regExp.test(yomi.katakana);
 
-const InputKatakana = (props: {
+const InputKatakanaList = (props: {
   defaultValue: string[];
   label: string;
-  onChange: (katakana: string[]) => void;
+  onChange: (katakanaList: string[]) => void;
 }): JSX.Element => (
   <div
     css={css`
@@ -199,32 +199,32 @@ const ConditionsInput = (
   }
 ): JSX.Element => (
   <div>
-    <InputKatakana
+    <InputKatakanaList
       defaultValue={props.beginWith}
       label="から始まる"
       onChange={props.onChangeBeginWith}
     />
-    <InputKatakana
+    <InputKatakanaList
       defaultValue={props.notBeginWith}
       label="から始まらない"
       onChange={props.onChangeNotBeginWith}
     />
-    <InputKatakana
+    <InputKatakanaList
       defaultValue={props.endWith}
       label="で終わる"
       onChange={props.onChangeEndWidth}
     />
-    <InputKatakana
+    <InputKatakanaList
       defaultValue={props.notEndWith}
       label="で終わらない"
       onChange={props.onChangeNotEndWith}
     />
-    <InputKatakana
+    <InputKatakanaList
       defaultValue={props.include}
       label="を含む"
       onChange={props.onChangeInclude}
     />
-    <InputKatakana
+    <InputKatakanaList
       defaultValue={props.exclude}
       label="を含まない"
       onChange={props.onChangeExclude}
@@ -381,8 +381,8 @@ const YomiList = (props: {
 const headerHeight = "48px";
 const wideWidth = "640px";
 
-const App = (props: { yomis: Yomi.Yomi[] }): JSX.Element => {
-  const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.yomis);
+const App = (props: { yomiList: Yomi.Yomi[] }): JSX.Element => {
+  const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.yomiList);
   const [state, setState] = React.useState<Conditions>({
     beginWith: [],
     notBeginWith: [],
@@ -452,8 +452,8 @@ const App = (props: { yomis: Yomi.Yomi[] }): JSX.Element => {
         ? state.partsOfSpeech.filter((part: string) => part !== partOfSpeech)
         : [...state.partsOfSpeech, partOfSpeech]
     });
-  const yomis = [];
-  for (const yomi of props.yomis) {
+  const yomiList = [];
+  for (const yomi of props.yomiList) {
     if (!includesPartsOfSpeech(yomi)) continue;
     if (!beginsWith(yomi)) continue;
     if (!doesNotBeginWith(yomi)) continue;
@@ -462,7 +462,7 @@ const App = (props: { yomis: Yomi.Yomi[] }): JSX.Element => {
     if (!includes(yomi)) continue;
     if (!excludes(yomi)) continue;
     if (!hasLength(yomi)) continue;
-    yomis.push(yomi);
+    yomiList.push(yomi);
   }
   return (
     <div>
@@ -569,7 +569,7 @@ const App = (props: { yomis: Yomi.Yomi[] }): JSX.Element => {
             }
           `}
         >
-          <YomiList allYomiList={props.yomis} selectedYomiList={yomis} />
+          <YomiList allYomiList={props.yomiList} selectedYomiList={yomiList} />
         </div>
       </div>
     </div>

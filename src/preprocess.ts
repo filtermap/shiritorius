@@ -137,7 +137,7 @@ function parseDictionaryCSV(filepath: string): Promise<Record[]> {
   });
 }
 
-function recordsToYomis(records: Record[]): Yomi.Yomi[] {
+function recordsToYomiList(records: Record[]): Yomi.Yomi[] {
   console.log(`number of records being processed: ${records.length}`);
   const katakanaToYomiMap = new Map<string, Yomi.Yomi>();
   let numberOfRecordsWithYomiIncludingOtherThanKatakana = 0;
@@ -145,7 +145,7 @@ function recordsToYomis(records: Record[]): Yomi.Yomi[] {
   let nextHomonymId = 0;
   for (const record of records) {
     const katakana = record[11];
-    if (!katakana.match(Yomi.katakanaOnlyRegexp)) {
+    if (!katakana.match(Yomi.katakanaOnlyRegExp)) {
       numberOfRecordsWithYomiIncludingOtherThanKatakana++;
       continue;
     }
@@ -172,9 +172,9 @@ function recordsToYomis(records: Record[]): Yomi.Yomi[] {
   console.log(
     `number of records with yomi including other than katakana: ${numberOfRecordsWithYomiIncludingOtherThanKatakana}`
   );
-  const yomis = [...katakanaToYomiMap.values()];
-  console.log(`number of yomis: ${yomis.length}`);
-  return yomis;
+  const yomiList = [...katakanaToYomiMap.values()];
+  console.log(`number of yomi: ${yomiList.length}`);
+  return yomiList;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -235,9 +235,9 @@ async function main(): Promise<void> {
   );
   const csvFilepath = path.join(decompressedDirpath, "naist-jdic.csv");
   const records = await parseDictionaryCSV(csvFilepath);
-  const yomis = recordsToYomis(records);
-  const jsonFilepath = path.join("src", "yomis.json");
-  await saveAsJSONFile(yomis, jsonFilepath);
+  const yomiList = recordsToYomiList(records);
+  const jsonFilepath = path.join("src", "yomiList.json");
+  await saveAsJSONFile(yomiList, jsonFilepath);
 }
 
 main();

@@ -1,4 +1,4 @@
-export const katakanaOnlyRegexp = /^[ァ-ヺー]+$/;
+export const katakanaOnlyRegExp = /^[ァ-ヺー]+$/;
 
 export const hiraganaToKatakana = (string: string): string =>
   string.replace(/[ぁ-ゖ]/g, match =>
@@ -20,9 +20,9 @@ export type Homonym = {
   partOfSpeech: string;
 };
 
-export function collectPartsOfSpeech(yomis: Yomi[]): string[] {
+export function collectPartsOfSpeech(yomiList: Yomi[]): string[] {
   const partOfSpeechSet = new Set<string>();
-  for (const yomi of yomis) {
+  for (const yomi of yomiList) {
     for (const { partOfSpeech } of yomi.homonyms) {
       partOfSpeechSet.add(partOfSpeech);
     }
