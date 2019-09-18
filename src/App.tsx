@@ -256,13 +256,15 @@ const YomiList = (props: {
     pageNumber: 0,
     yomi: null
   });
-  React.useEffect(() => {
-    setState({
-      ...state,
-      pageNumber: 0,
-      yomi: null
-    });
-  }, [props.selectedYomiList]);
+  React.useEffect(
+    () =>
+      setState(state => ({
+        ...state,
+        pageNumber: 0,
+        yomi: null
+      })),
+    [props.selectedYomiList]
+  );
   const beginIndex = state.pageNumber * state.pageSize;
   const endIndex = beginIndex + state.pageSize;
   const pageYomiList = props.selectedYomiList.slice(beginIndex, endIndex);
@@ -393,14 +395,14 @@ const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
   });
   React.useEffect(() => {
     const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.allYomiList);
-    setState({
+    setState(state => ({
       ...state,
       sortedAllYomiList: Yomi.sortByKatakana(props.allYomiList),
       allPartsOfSpeech,
       partsOfSpeech: allPartsOfSpeech.includes("名詞")
         ? ["名詞"]
         : allPartsOfSpeech
-    });
+    }));
   }, [props.allYomiList]);
   const beginsWith =
     state.beginWith.length === 0
