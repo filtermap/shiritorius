@@ -72,12 +72,6 @@ function gunzipAndExtractTar(filepath: string, dirpath: string): Promise<void> {
   });
 }
 
-function copyFile(src: string, dest: string): void {
-  console.log(`copying: ${src} to ${dest}`);
-  fs.copyFileSync(src, dest);
-  console.log(`copied: ${src} to ${dest}`);
-}
-
 type Record = string[];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,10 +223,17 @@ async function main(): Promise<void> {
   }
   const decompressedDirpath = downloadedFilePath.replace(/.tar.gz$/, "");
   await gunzipAndExtractTar(downloadedFilePath, decompressedDirpath);
-  copyFile(
-    path.join(decompressedDirpath, "COPYING"),
-    path.join("src", "COPYING.txt")
+  const aboutDictionaryFilepath = path.join("src", "aboutDictionary.txt");
+  console.log(`creating file: ${aboutDictionaryFilepath}`);
+  fs.writeFileSync(aboutDictionaryFilepath, "mecab-naist-jdic-0.6.3b-20111013");
+  console.log(`created file: ${aboutDictionaryFilepath}`);
+  const copyingFilepath = path.join(decompressedDirpath, "COPYING");
+  console.log(`copying: ${copyingFilepath} to ${aboutDictionaryFilepath}`);
+  fs.appendFileSync(
+    aboutDictionaryFilepath,
+    `\n\n${fs.readFileSync(copyingFilepath)}`
   );
+  console.log(`copied: ${copyingFilepath} to ${aboutDictionaryFilepath}`);
   const csvFilepath = path.join(decompressedDirpath, "naist-jdic.csv");
   const records = await parseDictionaryCSV(csvFilepath);
   const yomiList = recordsToYomiList(records);

@@ -2,7 +2,7 @@
 import React from "react";
 import { css, jsx } from "@emotion/core";
 import * as Yomi from "./Yomi";
-import copyingUrl from "./COPYING.txt";
+import aboutDictionaryUrl from "./aboutDictionary.txt";
 
 const createKatakanaRegExpTester = (
   regExp: RegExp
@@ -498,7 +498,7 @@ const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
             margin-left: auto;
           `}
         >
-          <a href={copyingUrl}>辞書</a>
+          <a href={aboutDictionaryUrl}>辞書</a>
         </div>
         <div>
           <a href="https://github.com/filtermap/shiritorius">GitHub</a>

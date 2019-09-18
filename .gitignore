@@ -3,5 +3,5 @@ dist
 mecab-naist-jdic-0.6.3b-20111013
 mecab-naist-jdic-0.6.3b-20111013.tar.gz
 node_modules
-src/COPYING.txt
+src/aboutDictionary.txt
 src/yomiList.json
