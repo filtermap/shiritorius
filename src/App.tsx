@@ -243,6 +243,53 @@ const ConditionsInput = (
   </div>
 );
 
+const Pagination = (props: {
+  pageNumber: number;
+  numberOfPages: number;
+  onChangePageNumber: (pageNumber: number) => void;
+}): JSX.Element => (
+  <div
+    css={css`
+      display: flex;
+      & > div {
+        flex: 1;
+        padding: 0.5rem 1rem;
+      }
+    `}
+  >
+    {props.pageNumber > 0 ? (
+      <div
+        onClick={(): void => props.onChangePageNumber(props.pageNumber - 1)}
+        css={css`
+          &:hover {
+            background: rgba(0, 0, 0, 0.1);
+          }
+          cursor: pointer;
+        `}
+      >
+        前のページ
+      </div>
+    ) : (
+      <div></div>
+    )}
+    {props.pageNumber < props.numberOfPages ? (
+      <div
+        onClick={(): void => props.onChangePageNumber(props.pageNumber + 1)}
+        css={css`
+          &:hover {
+            background: rgba(0, 0, 0, 0.1);
+          }
+          cursor: pointer;
+        `}
+      >
+        次のページ
+      </div>
+    ) : (
+      <div></div>
+    )}
+  </div>
+);
+
 const YomiList = (props: {
   allYomiList: Yomi.Yomi[];
   selectedYomiList: Yomi.Yomi[];
@@ -271,6 +318,15 @@ const YomiList = (props: {
   const numberOfPages = Math.floor(
     props.selectedYomiList.length / state.pageSize
   );
+  const onChangePageNumber = (pageNumber: number): void =>
+    setState({ ...state, pageNumber });
+  const YomiListPagination = (): JSX.Element => (
+    <Pagination
+      pageNumber={state.pageNumber}
+      numberOfPages={numberOfPages}
+      onChangePageNumber={onChangePageNumber}
+    />
+  );
   return (
     <div>
       <div
@@ -281,52 +337,7 @@ const YomiList = (props: {
         {props.selectedYomiList.length} 件
         {state.pageNumber >= 1 && `中 ${state.pageNumber + 1} ページ目`}
       </div>
-      {numberOfPages >= 1 && (
-        <div
-          css={css`
-            display: flex;
-            & > div {
-              flex: 1;
-              padding: 0.5rem 1rem;
-            }
-          `}
-        >
-          {state.pageNumber > 0 ? (
-            <div
-              onClick={(): void =>
-                setState({ ...state, pageNumber: state.pageNumber - 1 })
-              }
-              css={css`
-                &:hover {
-                  background: rgba(0, 0, 0, 0.1);
-                }
-                cursor: pointer;
-              `}
-            >
-              前のページ
-            </div>
-          ) : (
-            <div></div>
-          )}
-          {state.pageNumber < numberOfPages ? (
-            <div
-              onClick={(): void =>
-                setState({ ...state, pageNumber: state.pageNumber + 1 })
-              }
-              css={css`
-                &:hover {
-                  background: rgba(0, 0, 0, 0.1);
-                }
-                cursor: pointer;
-              `}
-            >
-              次のページ
-            </div>
-          ) : (
-            <div></div>
-          )}
-        </div>
-      )}
+      <YomiListPagination />
       <ol
         css={css`
           list-style: none;
@@ -367,6 +378,7 @@ const YomiList = (props: {
           </li>
         ))}
       </ol>
+      <YomiListPagination />
     </div>
   );
 };
