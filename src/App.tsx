@@ -4,10 +4,19 @@ import { css, jsx } from "@emotion/core";
 import * as Yomi from "./Yomi";
 import aboutDictionaryUrl from "./aboutDictionary.txt";
 
-const createKatakanaRegExpTester = (
+const createKatakanaRegExpMatchTester = (
   regExp: RegExp
 ): ((yomi: Yomi.Yomi) => boolean) => (yomi): boolean =>
   regExp.test(yomi.katakana);
+
+// Javascript regex negative lookbehind not working in firefox - Stack Overflow
+// https://stackoverflow.com/questions/50011366/javascript-regex-negative-lookbehind-not-working-in-firefox
+// Can I use... Support tables for HTML5, CSS3, etc
+// https://caniuse.com/#search=lookbehind
+const createKatakanaRegExpNegativeMatchTester = (
+  regExp: RegExp
+): ((yomi: Yomi.Yomi) => boolean) => (yomi): boolean =>
+  !regExp.test(yomi.katakana);
 
 const InputKatakanaList = (props: {
   defaultValue: string[];
@@ -419,34 +428,38 @@ const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
   const beginsWith =
     state.beginWith.length === 0
       ? (): boolean => true
-      : createKatakanaRegExpTester(
+      : createKatakanaRegExpMatchTester(
           new RegExp(`^(${state.beginWith.join("|")})`)
         );
   const doesNotBeginWith =
     state.notBeginWith.length === 0
       ? (): boolean => true
-      : createKatakanaRegExpTester(
-          new RegExp(`^(?!(${state.notBeginWith.join("|")}))`)
+      : createKatakanaRegExpNegativeMatchTester(
+          new RegExp(`^(${state.notBeginWith.join("|")})`)
         );
   const endsWith =
     state.endWith.length === 0
       ? (): boolean => true
-      : createKatakanaRegExpTester(new RegExp(`(${state.endWith.join("|")})$`));
+      : createKatakanaRegExpMatchTester(
+          new RegExp(`(${state.endWith.join("|")})$`)
+        );
   const doesNotEndWith =
     state.notEndWith.length === 0
       ? (): boolean => true
-      : createKatakanaRegExpTester(
-          new RegExp(`(?<!(${state.notEndWith.join("|")}))$`)
+      : createKatakanaRegExpNegativeMatchTester(
+          new RegExp(`(${state.notEndWith.join("|")})$`)
         );
   const includes =
     state.include.length === 0
       ? (): boolean => true
-      : createKatakanaRegExpTester(new RegExp(`(${state.include.join("|")})`));
+      : createKatakanaRegExpMatchTester(
+          new RegExp(`(${state.include.join("|")})`)
+        );
   const excludes =
     state.exclude.length === 0
       ? (): boolean => true
-      : createKatakanaRegExpTester(
-          new RegExp(`^(?!.*(${state.exclude.join("|")})).*$`)
+      : createKatakanaRegExpNegativeMatchTester(
+          new RegExp(`(${state.exclude.join("|")})`)
         );
   const hasLength = ((): ((yomi: Yomi.Yomi) => boolean) => {
     if (state.length === null) return (): boolean => true;
