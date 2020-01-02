@@ -213,7 +213,7 @@ async function main(): Promise<void> {
     return;
   }
   const urlString =
-    "https://jaist.dl.osdn.jp/naist-jdic/53500/mecab-naist-jdic-0.6.3b-20111013.tar.gz";
+    "http://jaist.dl.osdn.jp/naist-jdic/53500/mecab-naist-jdic-0.6.3b-20111013.tar.gz";
   const parsedUrl = new url.URL(urlString);
   const downloadedFilePath = path.basename(parsedUrl.pathname);
   if (!fs.existsSync(downloadedFilePath) || options.force) {
