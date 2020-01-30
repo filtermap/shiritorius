@@ -46,7 +46,7 @@ type LengthComparisonOperator = typeof lengthComparisonOperators[number];
 // https://stackoverflow.com/questions/56565528/typescript-const-assertions-how-to-use-array-prototype-includes/56745484#56745484
 declare global {
   interface ReadonlyArray<T> {
-    includes<U>(x: U & ((T & U) extends never ? never : unknown)): boolean;
+    includes<U>(x: U & (T & U extends never ? never : unknown)): boolean;
   }
 }
 const isLengthComparisonOperator = (
