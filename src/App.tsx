@@ -86,7 +86,7 @@ const InputLength = (props: {
         props.onChangeLengthComparisonOperator(lengthComparisonOperator);
       }}
     >
-      {lengthComparisonOperators.map(operator => (
+      {lengthComparisonOperators.map((operator) => (
         <option key={operator} value={operator}>
           {operator}
         </option>
@@ -122,7 +122,7 @@ const PartsOfSpeechSelector = (props: {
           : "品詞を選択してください"}
       </div>
       {opened &&
-        props.allPartsOfSpeech.map(partOfSpeech => (
+        props.allPartsOfSpeech.map((partOfSpeech) => (
           <div
             key={partOfSpeech}
             onClick={props.createPartsOfSpeechSelector(partOfSpeech)}
@@ -310,14 +310,14 @@ const YomiList = (props: {
   }>({
     pageSize: 100,
     pageNumber: 0,
-    yomi: null
+    yomi: null,
   });
   React.useEffect(
     () =>
-      setState(state => ({
+      setState((state) => ({
         ...state,
         pageNumber: 0,
-        yomi: null
+        yomi: null,
       })),
     [props.selectedYomiList]
   );
@@ -361,7 +361,7 @@ const YomiList = (props: {
           }
         `}
       >
-        {pageYomiList.map(yomi => (
+        {pageYomiList.map((yomi) => (
           <li key={yomi.id}>
             <div
               onClick={(): void =>
@@ -377,7 +377,7 @@ const YomiList = (props: {
                   padding: 0.5rem 1rem 1rem;
                 `}
               >
-                {yomi.homonyms.map(hononym => (
+                {yomi.homonyms.map((hononym) => (
                   <li key={hononym.id}>
                     【{hononym.word}】［{hononym.partOfSpeech}］
                   </li>
@@ -412,17 +412,17 @@ const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
     exclude: [],
     length: null,
     lengthComparisonOperator: "文字",
-    partsOfSpeech: []
+    partsOfSpeech: [],
   });
   React.useEffect(() => {
     const allPartsOfSpeech = Yomi.collectPartsOfSpeech(props.allYomiList);
-    setState(state => ({
+    setState((state) => ({
       ...state,
       sortedAllYomiList: Yomi.sortByKatakana(props.allYomiList),
       allPartsOfSpeech,
       partsOfSpeech: allPartsOfSpeech.includes("名詞")
         ? ["名詞"]
-        : allPartsOfSpeech
+        : allPartsOfSpeech,
     }));
   }, [props.allYomiList]);
   const beginsWith =
@@ -475,7 +475,7 @@ const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
     }
   })();
   const includesPartsOfSpeech = (yomi: Yomi.Yomi): boolean =>
-    yomi.homonyms.some(homonym =>
+    yomi.homonyms.some((homonym) =>
       state.partsOfSpeech.includes(homonym.partOfSpeech)
     );
   const createPartsOfSpeechSelector = (partOfSpeech: string) => (): void =>
@@ -483,7 +483,7 @@ const App = (props: { allYomiList: Yomi.Yomi[] }): JSX.Element => {
       ...state,
       partsOfSpeech: state.partsOfSpeech.includes(partOfSpeech)
         ? state.partsOfSpeech.filter((part: string) => part !== partOfSpeech)
-        : [...state.partsOfSpeech, partOfSpeech]
+        : [...state.partsOfSpeech, partOfSpeech],
     });
   const sortedSelectedYomiList = [];
   for (const yomi of state.sortedAllYomiList) {

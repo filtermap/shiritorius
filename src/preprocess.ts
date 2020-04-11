@@ -32,15 +32,15 @@ function progressStateToString({
   time: { elapsed, remaining },
   speed,
   percent,
-  size: { total, transferred }
+  size: { total, transferred },
 }: ProgressState): string {
   return `elapsed: ${elapsed} s, remaining: ${remaining} s, speed: ${bytesToMegaBytes(
     speed
   ).toFixed(1)} MB/s, total: ${bytesToMegaBytes(total).toFixed(
     1
-  )} MB, transferred: ${bytesToMegaBytes(transferred).toFixed(
-    1
-  )} MB, ${percent * 100} %`;
+  )} MB, transferred: ${bytesToMegaBytes(transferred).toFixed(1)} MB, ${
+    percent * 100
+  } %`;
 }
 
 function download(urlString: string, filepath: string): Promise<void> {
@@ -97,7 +97,7 @@ function parseDictionaryCSV(filepath: string): Promise<Record[]> {
       rtrim: true,
       delimiter: ",",
       // eslint-disable-next-line @typescript-eslint/camelcase
-      skip_lines_with_error: true
+      skip_lines_with_error: true,
     });
     parser.on("error", (err: Error) => reject(err));
     parser.on("skip", (err: Error) => {
@@ -150,14 +150,15 @@ function recordsToYomiList(records: Record[]): Yomi.Yomi[] {
       katakanaToYomiMap.set(katakana, {
         id: nextYomiId,
         katakana,
-        homonyms: [{ id: nextHomonymId, word, partOfSpeech }]
+        homonyms: [{ id: nextHomonymId, word, partOfSpeech }],
       });
       nextYomiId++;
       nextHomonymId++;
       continue;
     }
     const sameHomonymAlreadyExists = yomi.homonyms.some(
-      homonym => homonym.word === word && homonym.partOfSpeech === partOfSpeech
+      (homonym) =>
+        homonym.word === word && homonym.partOfSpeech === partOfSpeech
     );
     if (sameHomonymAlreadyExists) continue;
     yomi.homonyms.push({ id: nextHomonymId, word, partOfSpeech });
@@ -176,7 +177,7 @@ function saveAsJSONFile(data: any, filepath: string): Promise<void> {
   console.log(`saving: ${filepath}`);
   const jsonString = JSON.stringify(data);
   return new Promise((resolve, reject): void => {
-    fs.writeFile(filepath, jsonString, err => {
+    fs.writeFile(filepath, jsonString, (err) => {
       if (err) {
         reject(err);
         return;
@@ -193,20 +194,20 @@ async function main(): Promise<void> {
       name: "force",
       alias: "f",
       type: Boolean,
-      description: "Force a download."
+      description: "Force a download.",
     },
     {
       name: "help",
       alias: "h",
       type: Boolean,
-      description: "Print this list and exit."
-    }
+      description: "Print this list and exit.",
+    },
   ];
   const options = commandLineArgs(optionDefinitions);
   if (options.help) {
     const sections = [
       { header: "Usage:", content: "yarn preprocess [options]" },
-      { header: "Available Options:", optionList: optionDefinitions }
+      { header: "Available Options:", optionList: optionDefinitions },
     ];
     const usage = commandLineUsage(sections);
     console.log(usage);

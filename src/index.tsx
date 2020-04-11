@@ -5,7 +5,7 @@ import App from "./App";
 import yomiListJSONUrl from "./yomiList.json";
 
 async function main(): Promise<void> {
-  const yomiList = await fetch(yomiListJSONUrl).then(response =>
+  const yomiList = await fetch(yomiListJSONUrl).then((response) =>
     response.json()
   );
   ReactDOM.render(

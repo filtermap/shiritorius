@@ -1,12 +1,12 @@
 export const katakanaOnlyRegExp = /^[ァ-ヺー]+$/;
 
 export const hiraganaToKatakana = (string: string): string =>
-  string.replace(/[ぁ-ゖ]/g, match =>
+  string.replace(/[ぁ-ゖ]/g, (match) =>
     String.fromCharCode(match.charCodeAt(0) + 96)
   );
 
 export const extractKatakana = (string: string): string[] =>
-  string.split(/[^ァ-ヺー]/).filter(string => string.length > 0);
+  string.split(/[^ァ-ヺー]/).filter((string) => string.length > 0);
 
 export type Yomi = {
   id: number;
