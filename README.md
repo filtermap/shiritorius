@@ -52,6 +52,12 @@ yarn test
 yarn build
 ```
 
+## type check, lint, test and build
+
+```sh
+yarn predeploy
+```
+
 ## deploy
 
 ```sh
