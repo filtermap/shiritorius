@@ -8,7 +8,7 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint --ext .js,.ts,.tsx .",
     "test": "jest",
-    "build": "parcel build src/index.html --public-url .",
+    "build": "parcel build src/index.html --experimental-scope-hoisting --public-url .",
     "predeploy": "run-s type-check lint test build",
     "deploy": "gh-pages -d dist"
   },
