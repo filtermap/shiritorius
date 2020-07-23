@@ -96,7 +96,6 @@ function parseDictionaryCSV(filepath: string): Promise<Record[]> {
       ltrim: true,
       rtrim: true,
       delimiter: ",",
-      // eslint-disable-next-line @typescript-eslint/camelcase
       skip_lines_with_error: true,
     });
     parser.on("error", (err: Error) => reject(err));
