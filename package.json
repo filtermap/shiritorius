@@ -6,7 +6,7 @@
     "preprocess": "ts-node --files src/preprocess.ts",
     "dev": "parcel serve src/index.html --open",
     "type-check": "tsc --noEmit",
-    "lint": "eslint --ext .js,.ts,.tsx .",
+    "lint": "eslint --ext .js,.ts,.tsx --ignore-path .gitignore .",
     "test": "jest",
     "build": "parcel build src/index.html --experimental-scope-hoisting --public-url .",
     "predeploy": "run-s type-check lint test build",
