@@ -17,3 +17,8 @@ yarn # install dependencies
 yarn start # run this app
 yarn deploy # deploy
 ```
+
+## お問い合わせ (Contact)
+
+- [Email: reducefiltermap@gmail.com](<mailto:reducefiltermap@gmail.com?subject=shiritoriusについて%20(Re:shiritorius)&body=開発者%20filtermap%20がご用件をお伺いします。%20(Please%20write%20your%20message%20here.)>)
+- [Twitter: @filtermap](https://twitter.com/filtermap)
