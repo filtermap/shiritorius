@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "preprocess": "ts-node --files src/preprocess.ts",
-    "dev": "parcel serve src/index.html --open",
+    "postinstall": "ts-node --files src/preprocess.ts",
+    "start": "parcel serve src/index.html --open",
     "type-check": "tsc --noEmit",
     "lint": "eslint --ext .js,.ts,.tsx --ignore-path .gitignore .",
     "test": "jest",

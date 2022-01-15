@@ -4,62 +4,16 @@
 
 ![Screen shot](screenshot.png?raw=true)
 
-## demo
+## アプリ App
 
 [シリトリウス - Shiritorius](https://filtermap.github.io/shiritorius/)
 
-## install
-
-Make sure you have [windows-build-tools](https://www.npmjs.com/package/windows-build-tools) globaly installed.
+## 開発 develop
 
 ```sh
-# after installed windows-build-tools
-git clone <repository> <dir>
-cd <dir>
-yarn
-yarn preprocess
-```
-
-## develop
-
-```sh
-yarn dev
-```
-
-## type check
-
-```sh
-yarn type-check
-```
-
-## lint
-
-```sh
-yarn lint
-```
-
-## test
-
-Only node-like environment is available.
-
-```sh
-yarn test
-```
-
-## build
-
-```sh
-yarn build
-```
-
-## type check, lint, test and build
-
-```sh
-yarn predeploy
-```
-
-## deploy
-
-```sh
-yarn deploy
+git clone https://github.com/filtermap/shiritorius.git
+cd shiritorius
+yarn # install dependencies
+yarn start # run this app
+yarn deploy # deploy
 ```
