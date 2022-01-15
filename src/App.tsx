@@ -4,19 +4,19 @@ import { css, jsx } from "@emotion/react";
 import * as Yomi from "./Yomi";
 import aboutDictionaryUrl from "./aboutDictionary.txt";
 
-const createKatakanaRegExpMatchTester = (
-  regExp: RegExp
-): ((yomi: Yomi.Yomi) => boolean) => (yomi): boolean =>
-  regExp.test(yomi.katakana);
+const createKatakanaRegExpMatchTester =
+  (regExp: RegExp): ((yomi: Yomi.Yomi) => boolean) =>
+  (yomi): boolean =>
+    regExp.test(yomi.katakana);
 
 // Javascript regex negative lookbehind not working in firefox - Stack Overflow
 // https://stackoverflow.com/questions/50011366/javascript-regex-negative-lookbehind-not-working-in-firefox
 // Can I use... Support tables for HTML5, CSS3, etc
 // https://caniuse.com/#search=lookbehind
-const createKatakanaRegExpNegativeMatchTester = (
-  regExp: RegExp
-): ((yomi: Yomi.Yomi) => boolean) => (yomi): boolean =>
-  !regExp.test(yomi.katakana);
+const createKatakanaRegExpNegativeMatchTester =
+  (regExp: RegExp): ((yomi: Yomi.Yomi) => boolean) =>
+  (yomi): boolean =>
+    !regExp.test(yomi.katakana);
 
 const InputKatakanaList = (props: {
   defaultValue: string[];
