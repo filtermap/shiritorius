@@ -13,7 +13,9 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@babel/core": "^7.0.0",
     "@emotion/core": "^11.0.0",
+    "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@types/command-line-args": "^5.2.0",
     "@types/command-line-usage": "^5.0.2",
@@ -41,7 +43,7 @@
     "parcel-bundler": "^1.12.5",
     "parcel-plugin-json-url-loader": "^0.1.2",
     "prettier": "^2.5.1",
-    "react": "^17.0.2",
+    "react": ">=16.8.0",
     "react-dom": "^17.0.2",
     "request": "^2.88.2",
     "request-progress": "^3.0.0",
