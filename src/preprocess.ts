@@ -4,7 +4,7 @@ import url from "url";
 import zlib from "zlib";
 import commandLineArgs from "command-line-args";
 import commandLineUsage from "command-line-usage";
-import csvParse from "csv-parse";
+import { Options, parse } from "csv-parse";
 import iconv from "iconv-lite";
 import request from "request";
 import progress from "request-progress";
@@ -91,13 +91,14 @@ function parseDictionaryCSV(filepath: string): Promise<Record[]> {
     let numberOfInvalidTypeRecords = 0;
     let numberOfParsedRecords = 0;
     const records: Record[] = [];
-    const parser = csvParse({
+    const parseOptions: Options = {
       quote: "",
       ltrim: true,
       rtrim: true,
       delimiter: ",",
-      skip_lines_with_error: true,
-    });
+      skipRecordsWithError: true,
+    };
+    const parser = parse(parseOptions);
     parser.on("error", (err: Error) => reject(err));
     parser.on("skip", (err: Error) => {
       numberOfSkippedRecords++;
